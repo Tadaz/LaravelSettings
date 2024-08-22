@@ -311,11 +311,14 @@ class DatabaseStore extends AbstractStore
             'deleted'  => [],
         ];
 
-        foreach ($this->newQuery()->pluck($this->keyColumn) as $key) {
-            if (Arr::has($changes['inserted'], $key))
-                $changes['updated'][$key] = $changes['inserted'][$key];
-            else
+        foreach ($this->newQuery()->pluck($this->valueColumn, $this->keyColumn) as $key => $value) {
+            if (Arr::has($changes['inserted'], $key)) {
+                if (Arr::get($changes['inserted'], $key) !== $value) {
+                    $changes['updated'][$key] = $changes['inserted'][$key];
+                }
+            } else {
                 $changes['deleted'][] = $key;
+            }
 
             Arr::forget($changes['inserted'], $key);
         }
